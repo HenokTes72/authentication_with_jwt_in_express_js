@@ -7,7 +7,7 @@ const config = require('../config/constants');
 const verifyAuth = require('../authentication/verifyAuth')
 const passport = require('passport');
 
-router.get('/', verifyAuth.isLoggedIn, (req, res) => {
+router.get('/', verifyAuth.isLoggedIn, verifyAuth.isAdmin, (req, res) => {
     res.json({ message: 'Welcome to users' })
 });
 
@@ -75,30 +75,30 @@ router.post('/login', (req, res) => {
         User.findOne({ email: req.body.email })
             .then(
                 user => {
-                    if(user){
+                    if (user) {
                         // res.status(200).json({token: jwt.sign()});
                         bcrypt.compare(req.body.password, user.password)
                             .then(
                                 isMatch => {
-                                     if(isMatch){
+                                    if (isMatch) {
                                         //  jwt.sign()
                                         console.log('the user id is ', user._id);
-                                        let token = jwt.sign({id: user._id}, config.jwtSecret);
-                                        res.status(200).json({token})
-                                     }
-                                     else {
-                                         res.status(401).json({message: 'Incalid userame or password'})
-                                     }
+                                        let token = jwt.sign({ id: user._id }, config.jwtSecret);
+                                        res.status(200).json({ token })
+                                    }
+                                    else {
+                                        res.status(401).json({ message: 'Incalid userame or password' })
+                                    }
                                 }
                             )
                     }
                     else {
-                        res.status(401).json({message: 'Invalid username or password'})
+                        res.status(401).json({ message: 'Invalid username or password' })
                     }
                 }
             );
 
-            // res.json({message: 'loggedIn'})
+        // res.json({message: 'loggedIn'})
     }
 })
 
