@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+const beautifyUnique = require('mongoose-beautiful-unique-validation');
+
 var userSchema = new Schema({
     name: String,
     email: {
@@ -23,4 +25,14 @@ var userSchema = new Schema({
     }
 });
 
+userSchema.plugin(beautifyUnique)
+// let handleDuplicationError = (err, res, next) => {
+//     // console.log('the error inside ', err)
+//     // let error = new Error('Duplicate entry');
+//     console.log(err)
+//     next({message: 'Duplicate entry'})
+// }
+
+// userSchema.post('save', handleDuplicationError);
+userSchema.on('index', err => {console.log('The error is ', err)})
 module.exports = mongoose.model('User', userSchema);

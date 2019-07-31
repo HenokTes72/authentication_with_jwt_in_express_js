@@ -4,15 +4,18 @@ var router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/constants');
-const verifyAuth = require('../authentication/verifyAuth')
+const verifyAuth = require('../authentication/verifyAuth');
 const passport = require('passport');
 
-router.get('/', verifyAuth.isLoggedIn, verifyAuth.isAdmin, (req, res) => {
+router.get('/', verifyAuth.isLoggedIn, (req, res) => {
     res.json({ message: 'Welcome to users' })
 });
 
+// signup route
 router.post('/signup', (req, res) => {
+    console.log(req.body);
     if (req.body.email != undefined && req.body.username != undefined) {
+        console.log('here too')
         User.findOne({ email: req.body.email })
             .then(
                 user => {
@@ -20,38 +23,54 @@ router.post('/signup', (req, res) => {
                         res.status(400).json({ message: 'email address already used' });
                     }
                     else {
-                        // if(user.username === req.body.username)
-                        let newUser = {
-                            name: req.body.name,
-                            email: req.body.email,
-                            username: req.body.username,
-                            password: req.body.password
-                        };
-
-                        bcrypt.genSalt(10)
+                        User.findOne({ username: req.body.username })
                             .then(
-                                salt => {
-                                    bcrypt.hash(newUser.password, salt)
-                                        .then(
-                                            hash => {
-                                                newUser.password = hash;
-                                                User.create(newUser)
-                                                    .then(
-                                                        user => {
-                                                            let { password, ...updatedUser } = user._doc;
-                                                            res.status(200).json({ user: updatedUser });
-                                                        }
-                                                    )
-                                            }
-                                        )
-                                        .catch(
-                                            err => res.status(500).json({ message: 'Internal error while creating your account' })
-                                        )
+                                user => {
+                                    if (user) {
+                                        res.status(400).json({ message: 'username address already used' });
+                                    }
+                                    else {
+                                        // if(user.username === req.body.username)
+                                        let newUser = {
+                                            name: req.body.name,
+                                            email: req.body.email,
+                                            username: req.body.username,
+                                            password: req.body.password
+                                        };
+
+                                        bcrypt.genSalt(10)
+                                            .then(
+                                                salt => {
+                                                    bcrypt.hash(newUser.password, salt)
+                                                        .then(
+                                                            hash => {
+                                                                newUser.password = hash;
+                                                                User.create(newUser)
+                                                                    .then(
+                                                                        user => {
+                                                                            let { password, ...updatedUser } = user._doc;
+                                                                            res.status(200).json({ user: updatedUser });
+                                                                        }
+                                                                    )
+                                                                    .catch(
+                                                                        err => {
+                                                                            console.log(err)
+                                                                        }
+                                                                    )
+                                                            }
+                                                        )
+                                                        .catch(
+                                                            err => res.status(500).json({ message: 'Internal error while creating your account' })
+                                                        )
+                                                }
+                                            )
+                                            .catch(
+                                                err => res.status(500).json({ message: 'Internal server error while creating your account' })
+                                            );
+                                    }
                                 }
                             )
-                            .catch(
-                                err => res.status(500).json({ message: 'Internal server error while creating your account' })
-                            );
+                            .catch()
                     }
                 }
             )
@@ -63,10 +82,12 @@ router.post('/signup', (req, res) => {
             )
     }
     else {
-        res.json(400).json({ message: 'You must provide an email' })
+        console.log('email or username missing')
+        res.status(400).json({ message: 'You must provide an email' })
     }
-})
+});
 
+// login route
 router.post('/login', (req, res) => {
     if (req.body.email == undefined || req.body.password == undefined) {
         res.status(400).json({ message: 'you must provide all credentials' });
@@ -97,10 +118,8 @@ router.post('/login', (req, res) => {
                     }
                 }
             );
-
-        // res.json({message: 'loggedIn'})
     }
-})
+});
 
 module.exports = router;
 
