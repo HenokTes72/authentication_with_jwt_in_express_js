@@ -3,7 +3,7 @@ This project demonstrates how to use jwt - json web token and passport in an exp
 ## Description
 [JWT](https://jwt.io/introduction/) is a Internet standard for creating JSON-based access tokens that assert some number of claims. For example, a server could generate a token that has the claim "logged in as admin" and provide that to a client. The client could then use that token to prove that it is logged in as admin and provide that to the server [JSON WEB TOKEN](https://en.wikipedia.org/wiki/JSON_Web_Token)
 
-[Passport](http://www.passportjs.org)  Passport is authentication middleware for Node.js. It can be dropped into any Express-based  web applicaiton.  
+[Passport](http://www.passportjs.org) is authentication middleware for Node.js. It can be dropped into any Express-based  web applicaiton.  
 
 Using these two libraries, we can implement a token based authentication in our express app
  
@@ -55,8 +55,7 @@ module.exports = new Strategy(opts, (payload, done) => {
 
 * Created 'verifyAuth' module that checks whether the user is loggedIn or not or is admin or not
 ```javascript
-    const passport = require('passport');
-
+const passport = require('passport');
 
 module.exports = {
     isLoggedIn: passport.authenticate('jwt', {session: false}),

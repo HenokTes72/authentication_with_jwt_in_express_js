@@ -5,92 +5,67 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/constants');
 const verifyAuth = require('../authentication/verifyAuth');
-const passport = require('passport');
+
+const inputValidation = require('../utils/inputVailidation');
+const { check, validationResult } = require('express-validator');
 
 router.get('/', verifyAuth.isLoggedIn, (req, res) => {
     res.json({ message: 'Welcome to users' })
 });
 
 // signup route
-router.post('/signup', (req, res) => {
-    console.log(req.body);
-    if (req.body.email != undefined && req.body.username != undefined) {
-        console.log('here too')
-        User.findOne({ email: req.body.email })
-            .then(
-                user => {
-                    if (user) {
-                        res.status(400).json({ message: 'email address already used' });
-                    }
-                    else {
-                        User.findOne({ username: req.body.username })
-                            .then(
-                                user => {
-                                    if (user) {
-                                        res.status(400).json({ message: 'username address already used' });
-                                    }
-                                    else {
-                                        // if(user.username === req.body.username)
-                                        let newUser = {
-                                            name: req.body.name,
-                                            email: req.body.email,
-                                            username: req.body.username,
-                                            password: req.body.password
-                                        };
+router.post('/signup', inputValidation.validateSignup(), (req, res) => {
+    const errors = validationResult(req);
 
-                                        bcrypt.genSalt(10)
-                                            .then(
-                                                salt => {
-                                                    bcrypt.hash(newUser.password, salt)
-                                                        .then(
-                                                            hash => {
-                                                                newUser.password = hash;
-                                                                User.create(newUser)
-                                                                    .then(
-                                                                        user => {
-                                                                            let { password, ...updatedUser } = user._doc;
-                                                                            res.status(200).json({ user: updatedUser });
-                                                                        }
-                                                                    )
-                                                                    .catch(
-                                                                        err => {
-                                                                            console.log(err)
-                                                                        }
-                                                                    )
-                                                            }
-                                                        )
-                                                        .catch(
-                                                            err => res.status(500).json({ message: 'Internal error while creating your account' })
-                                                        )
-                                                }
-                                            )
-                                            .catch(
-                                                err => res.status(500).json({ message: 'Internal server error while creating your account' })
-                                            );
-                                    }
-                                }
-                            )
-                            .catch()
-                    }
+    if (!errors.isEmpty()) {
+        console.log('Email error ', errors);
+        res.status(422).json({ errors: errors.array() });
+    }
+    else {
+        let newUser = {
+            name: req.body.name,
+            email: req.body.email,
+            username: req.body.username,
+            password: req.body.password
+        };
+
+        bcrypt.genSalt(10)
+            .then(
+                salt => {
+                    bcrypt.hash(newUser.password, salt)
+                        .then(
+                            hash => {
+                                newUser.password = hash;
+                                User.create(newUser)
+                                    .then(
+                                        user => {
+                                            let { password, ...updatedUser } = user._doc;
+                                            res.status(200).json({ user: updatedUser });
+                                        }
+                                    )
+                                    .catch(
+                                        err => {
+                                            console.log(err)
+                                        }
+                                    )
+                            }
+                        )
+                        .catch(
+                            err => res.status(500).json({ message: 'Internal error while creating your account' })
+                        )
                 }
             )
             .catch(
-                err => {
-                    console.log('The error is ', err)
-                    res.status(500).json({ message: err })
-                }
-            )
-    }
-    else {
-        console.log('email or username missing')
-        res.status(400).json({ message: 'You must provide an email' })
+                err => res.status(500).json({ message: 'Internal server error while creating your account' })
+            );
     }
 });
 
 // login route
-router.post('/login', (req, res) => {
-    if (req.body.email == undefined || req.body.password == undefined) {
-        res.status(400).json({ message: 'you must provide all credentials' });
+router.post('/login', inputValidation.validateLogin(), (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(422).json({ errors: errors.array() })
     }
     else {
         User.findOne({ email: req.body.email })

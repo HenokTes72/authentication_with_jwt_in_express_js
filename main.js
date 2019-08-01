@@ -7,6 +7,7 @@ var passport = require('passport')
 const usersRoute = require('./routes/users');
 const bodyParser = require('body-parser');
 const JwtStrategy = require('./authentication/jwtStrategy');
+// const expressValidator = require('express-validator');
 require('dotenv').config();
 // fixes issues with depreciation
 mongoose.set('useCreateIndex', true);
@@ -24,6 +25,8 @@ passport.use(JwtStrategy);
 app.use(passport.initialize());
 // use body parser to parse incoming request body
 app.use(bodyParser.json());
+// use express-validator
+// app.use(expressValidator());
 // mount users route
 app.use('/users', usersRoute);
 
