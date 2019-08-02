@@ -10,7 +10,27 @@ const inputValidation = require('../utils/inputVailidation');
 const { check, validationResult } = require('express-validator');
 
 router.get('/', verifyAuth.isLoggedIn, (req, res) => {
-    res.json({ message: 'Welcome to users' })
+    let page = req.query.page;
+    let size = req.query.size;
+
+    if (page == undefined || page < 0 || page == 0) {
+        page = 1
+    }
+    if (size == undefined || page < 0 || page == 0) {
+        size = 2
+    }
+    let query = { skip: size * (page - 1), limit: size };
+    console.log('The query is ', query);
+    User.find({}, {}, query)
+        .then(
+            users => {
+                console.log(users);
+                res.json(users)
+            }
+        )
+        .catch(
+            err => res.status(500).json({ messag: 'Error while fetching users data' })
+        )
 });
 
 // signup route
