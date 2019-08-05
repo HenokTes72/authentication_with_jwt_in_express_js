@@ -38,7 +38,6 @@ module.exports = {
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            console.log('Email error ', errors);
             res.status(422).json({ errors: errors.array() });
         }
         else {

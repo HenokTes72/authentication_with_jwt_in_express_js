@@ -31,3 +31,5 @@ app.use(bodyParser.json());
 app.use('/users', usersRoute);
 
 app.listen(process.env.SERVER_PORT, () => console.log('app started listening on port 4000'));  
+
+module.exports = app;

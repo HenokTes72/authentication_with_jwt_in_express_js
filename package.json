@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --1000"
   },
   "author": "Hizkias Abraham",
   "license": "ISC",
@@ -20,5 +20,10 @@
     "mongoose-beautiful-unique-validation": "^7.1.1",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^6.2.0"
   }
 }
